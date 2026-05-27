@@ -8,18 +8,16 @@
     :root { --bg: #050505; --text: #00FF41; }
     body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
     
-    /* Self-cleaning Terminal */
     #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; display: flex; flex-direction: column-reverse; overflow: hidden; }
     .line { font-size: 16px; margin-bottom: 8px; white-space: nowrap; }
     
-    /* Dashboard Layout: Optimized for phone (vertical stacking) */
     #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; display: flex; flex-direction: column; gap: 15px; }
     @keyframes reveal { to { opacity: 1; } }
     
-    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
-    .status-bar { font-size: 14px; font-weight: bold; background: #111; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 4px; text-align: center; }
+    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+    .status-bar { background: #111; padding: 10px; border-radius: 4px; text-align: center; font-size: 12px; }
     iframe { width: 100%; border: none; border-radius: 4px; }
-    button { background: #00FF41; color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; font-size: 14px; cursor: pointer; font-family: monospace; }
+    button { background: #00FF41; color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -28,9 +26,9 @@
 
 <div id="dashboard">
     <div id="status-bar" class="status-bar card">
-        <span id="time">TIME: --:--</span>
-        <span id="vibe-mode">VIBE: ...</span>
-        <span id="weather">WEATHER: LOADING...</span>
+        <div id="date-time">--/--/-- --:--</div>
+        <div id="weather-mood">WEATHER: -- | MOOD: --</div>
+        <div id="word-day" style="margin-top:5px; font-style:italic;">WORD: ...</div>
     </div>
     
     <div class="card">
@@ -39,52 +37,59 @@
     </div>
     
     <div class="card">
-        <div id="steam-data">
-            <div><strong>[MOST_PLAYED]</strong></div>
-            <div>> Red Dead Redemption 2 (160h)</div>
-            <div>> Rust (95h)</div>
-            <div>> Cyberpunk 2077 (88h)</div>
-            <div>> Avatar: Frontiers (85h)</div>
-            <div>> Crimson Desert (63h)</div>
-            <br>
-            <div><strong>[LAST_PLAYED]</strong></div>
-            <div>> Sifu (Dec 2025)</div>
-            <div>> Detroit: Become Human (Jan)</div>
-            <div>> Among Us (Jan)</div>
-            <div>> Mage Arena (Jan)</div>
-            <div>> Peek (Jan)</div>
-        </div>
+        <div><strong>[MOST PLAYED]</strong></div>
+        <div>Red Dead Redemption 2: 160.6h</div>
+        <div>Rust: 95.8h</div>
+        <div>Cyberpunk 2077: 88.8h</div>
+        <div>Avatar: Frontiers: 85.1h</div>
+        <div>Crimson Desert: 63.0h</div>
+        <br>
+        <div><strong>[RECENT]</strong></div>
+        <div>Mortal Kombat 1 (23 May)</div>
+        <div>Gamble With Your Friends (9 May)</div>
+        <div>Titanfall 2 (9 May)</div>
+        <div>Batman: Arkham Knight (2 May)</div>
+        <div>Watch_Dogs (2 May)</div>
     </div>
 </div>
 
 <script>
-    // 1. Rebuilt Auto-Scrolling, Self-Cleaning Terminal
+    // 1. Terminal Logic
     const log = document.getElementById('log');
-    const queue = [];
-    const commands = ["VIBE_CORE_BOOT", "KERNEL_LOAD_OK", "MEM_CHK: 8GB", "INIT_WEATHER_ENGINE", "SYNC_STEAM_LIBRARY_LOCAL", "TCP_HANDSHAKE: 192.168.1.10", "DASHBOARD_RENDER_START", "AUTH_TOKEN_GEN"];
-    
+    const cmds = ["SYS_INIT", "STEAM_DB_SYNC", "WEATHER_API_REQ", "AUTH_KEY_GEN", "VIBE_CORE_ACTIVE"];
     for(let i=0; i<150; i++) {
         setTimeout(() => {
-            if (log.children.length > 20) log.removeChild(log.firstChild); // Keep memory clean
+            if (log.children.length > 20) log.removeChild(log.firstChild);
             const el = document.createElement('div');
             el.className = 'line';
-            el.innerText = `[${new Date().toLocaleTimeString()}] > ${commands[Math.floor(Math.random()*commands.length)]}`;
+            el.innerText = `[${new Date().toLocaleTimeString()}] > ${cmds[i % cmds.length]}_${Math.floor(Math.random()*999)}`;
             log.appendChild(el);
-            // This forces the "scroll-down" behavior on each add
-            document.getElementById('terminal').scrollTop = document.getElementById('terminal').scrollHeight;
         }, i * 50); 
     }
-    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 9500);
+    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 9000);
 
-    // 2. Mobile Status Bar
+    // 2. Status Bar (Logic Engine)
+    const words = [
+        {w: "LIMINAL", d: "The threshold between two states."},
+        {w: "EPHEMERAL", d: "Lasting for a very short time."},
+        {w: "SYNCHRONOUS", d: "Occurring at the same time."}
+    ];
+    const pick = words[Math.floor(Math.random()*words.length)];
+
     setInterval(() => {
-        document.getElementById('time').innerText = `TIME: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        const now = new Date();
+        const hr = now.getHours();
+        document.getElementById('date-time').innerText = now.toLocaleDateString() + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('word-day').innerText = `${pick.w}: ${pick.d}`;
     }, 1000);
+
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(r => r.json()).then(d => {
             const temp = d.current.temperature_2m;
-            document.getElementById('weather').innerText = `WEATHER: ${temp}°C`;
-            document.getElementById('vibe-mode').innerText = `VIBE: ${temp > 22 ? 'DAY_ACTIVE' : 'DAY_CHILL'}`;
+            const hr = new Date().getHours();
+            // Mood Thresholds
+            let mood = (hr < 6 || hr > 22) ? "REFLECTIVE" : (temp < 15 ? "FOCUSED" : "ENERGIZED");
+            document.getElementById('weather-mood').innerText = `WEATHER: ${temp}°C | MOOD: ${mood}`;
         });
 
     // 3. Playlist
