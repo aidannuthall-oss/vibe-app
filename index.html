@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE_v2.2</title>
+    <title>VIBE_CORE_v3.1</title>
     <style>
         :root { 
             --accent: #00D4FF; 
@@ -18,9 +18,11 @@
             padding: 15px; 
             margin: 0; 
             overflow-x: hidden;
+            /* Prevent text selection when double tapping to skip */
+            user-select: none; 
+            -webkit-user-select: none;
         }
 
-        /* Screen Flash System */
         body.flash-active {
             animation: system-flash 0.2s ease-out forwards;
         }
@@ -29,7 +31,6 @@
             100% { background: var(--bg); }
         }
         
-        /* Terminal Interfaces (Shifted left to maximize screen real estate) */
         #stage-1, #stage-2 { 
             position: fixed; 
             top: 0; 
@@ -38,7 +39,7 @@
             height: 100%; 
             background: var(--bg); 
             z-index: 9999; 
-            padding: 20px 10px 20px 2px; /* Shifted left by removing left padding gap */
+            padding: 20px 10px 20px 2px;
             box-sizing: border-box;
             overflow: hidden;
             display: flex;
@@ -47,13 +48,12 @@
         }
         
         .term-line { 
-            font-size: 13px; /* Slightly smaller font to prevent line clipping on mobile */
+            font-size: 13px;
             line-height: 1.4;
             margin-bottom: 4px; 
             white-space: nowrap;
         }
 
-        /* Dashboard UI Layout (Solid Bubble Customization) */
         #dashboard { 
             width: 100%;
             max-width: 450px;
@@ -61,6 +61,7 @@
             display: flex; 
             flex-direction: column; 
             gap: 15px;
+            padding-bottom: 30px;
         }
         
         .bubble-module { 
@@ -69,8 +70,19 @@
             border-radius: 24px; 
             border: 1px solid #222222; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease, border-color 0.2s ease;
         }
         
+        /* Clickable Window Style for IG */
+        .clickable-window {
+            cursor: pointer;
+            text-align: center;
+        }
+        .clickable-window:active {
+            transform: scale(0.97);
+            border-color: var(--accent);
+        }
+
         .accent { 
             color: var(--accent); 
             font-weight: bold;
@@ -79,42 +91,59 @@
         .list-header {
             color: var(--accent);
             font-weight: bold;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            margin-top: 5px;
+            margin-bottom: 10px;
             border-bottom: 1px dashed #333333;
             padding-bottom: 4px;
         }
 
-        .list-row {
-            padding: 4px 0;
-            border-bottom: 1px solid #1a1a1a;
-            font-size: 14px;
-        }
-        
-        /* Spotify Player Viewport Configuration */
-        iframe { 
-            width: 100%; 
-            border: none; 
-            border-radius: 16px; 
-            background: #000000;
-        }
-        
+        /* Launcher & Audio Buttons */
         button { 
-            background: var(--accent); 
-            color: #000000; 
-            border: none; 
+            background: #000000; 
+            color: var(--accent); 
+            border: 1px solid var(--accent); 
             width: 100%; 
             padding: 12px; 
-            border-radius: 16px; 
+            border-radius: 12px; 
             font-weight: bold; 
             font-family: 'Courier New', monospace;
             font-size: 14px;
             cursor: pointer; 
-            margin-top: 12px;
-            transition: transform 0.1s ease;
+            transition: all 0.1s ease;
         }
         button:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
+            background: var(--accent);
+            color: #000;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .audio-controls {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -137,57 +166,98 @@
         <span class="accent">SYS_WOTD:</span> <span id="wotd" style="font-style: italic;">LOADING...</span>
     </div>
 
-    <div class="bubble-module">
-        <iframe id="player" src="https://open.spotify.com/?flow_ctx=388220ad-1f59-4a86-9ee2-d2fe1963d6a6%3A1779428964" height="550" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        <button onclick="cyclePlaylist()">CYCLE PLAYLISTS (0-3)</button>
+    <div class="bubble-module clickable-window" onclick="window.location.href='https://www.instagram.com/direct/inbox/'">
+        <div class="list-header" style="text-align: left;"><span class="status-dot"></span>[COMMS_NODE: INSTAGRAM]</div>
+        <div style="padding: 15px 0;">
+            <span style="font-size: 28px;">✉️</span><br>
+            <span style="font-size: 13px; color: #888; font-weight: bold; margin-top: 10px; display: inline-block;">
+                > INTERCEPT ACTIVE <br>
+                [ TAP TO SECURE INBOX ]
+            </span>
+        </div>
     </div>
 
     <div class="bubble-module">
-        <div class="list-header">[TOP FIVE PLAYED]</div>
-        <div class="list-row">01. Red Dead Redemption 2 <span class="accent">// 160.6 hrs</span></div>
-        <div class="list-row">02. Rust <span class="accent">// 95.8 hrs</span></div>
-        <div class="list-row">03. Cyberpunk 2077 <span class="accent">// 88.8 hrs</span></div>
-        <div class="list-row">04. Avatar: Frontiers <span class="accent">// 85.1 hrs</span></div>
-        <div class="list-row">05. Garry's Mod <span class="accent">// 63.0 hrs</span></div>
+        <div class="list-header">[LOCAL_AUDIO_DAEMON]</div>
+        <div><span class="accent">TRACK:</span> <span id="track-display">SYSTEM_IDLE</span></div>
+        <audio id="local-player" style="display:none;" onended="nextTrack()"></audio>
         
-        <div class="list-header">[MOST RECENT ENTRIES]</div>
-        <div class="list-row">> No Man's Sky <span class="accent">[Today]</span></div>
-        <div class="list-row">> Mortal Kombat 1 <span class="accent">[23 May]</span></div>
-        <div class="list-row">> Titanfall 2 <span class="accent">[09 May]</span></div>
-        <div class="list-row">> Content Warning <span class="accent">[06 May]</span></div>
+        <div class="audio-controls">
+            <button onclick="prevTrack()">[ |<< ]</button>
+            <button onclick="togglePlay()" id="play-btn">[ PLAY ]</button>
+            <button onclick="nextTrack()">[ >>| ]</button>
+        </div>
+    </div>
+
+    <div class="bubble-module">
+        <div class="list-header">[APP_LAUNCH_MATRIX]</div>
+        <div class="button-grid">
+            <button onclick="window.location.href='https://open.spotify.com/collection/playlists'">SPOTIFY_SYS</button>
+            <button onclick="window.location.href='https://discord.com/app'">DISCORD</button>
+            <button onclick="window.location.href='https://youtube.com'">YOUTUBE</button>
+            <button onclick="window.location.href='https://reddit.com'">REDDIT</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Self-cleaning rolling terminal engine helper
+    // GLOBAL BOOT TIMERS (Accessible for the skip function)
+    let stage1Interval, stage1Timeout, stage2Interval, stage2Timeout;
+    let isBooting = true;
+
+    // Secret Double-Tap Skip Mechanism
+    let lastTap = 0;
+    document.addEventListener('touchend', function(e) {
+        if(!isBooting) return;
+        let currentTime = new Date().getTime();
+        let tapLength = currentTime - lastTap;
+        if (tapLength < 500 && tapLength > 0) {
+            skipBootSequence();
+            e.preventDefault();
+        }
+        lastTap = currentTime;
+    });
+    document.addEventListener('dblclick', () => { if(isBooting) skipBootSequence(); });
+
+    function skipBootSequence() {
+        isBooting = false;
+        clearInterval(stage1Interval);
+        clearInterval(stage2Interval);
+        clearTimeout(stage1Timeout);
+        clearTimeout(stage2Timeout);
+        document.body.classList.remove('flash-active');
+        document.getElementById('stage-1').style.display = 'none';
+        document.getElementById('stage-2').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'flex';
+    }
+
+    // Terminal logic
     function appendTerminalLine(targetId, text, maxLines = 22) {
         const container = document.getElementById(targetId);
         if (!container) return;
-        
         if (container.children.length >= maxLines) {
             container.removeChild(container.firstChild);
         }
-        
         const line = document.createElement('div');
         line.className = 'term-line';
         line.innerHTML = text;
         container.appendChild(line);
     }
 
-    // STAGE 1 LOGIC: Slow System Core Checks (Runs for exactly 6000ms)
+    // STAGE 1 LOGIC (6000ms)
     const log1Target = "log-1";
     const stage1Commands = [
         "root@vibe_core:~# ./init_hardware_handshake.sh",
         "[-] Checking storage array layout... OK",
         "[-] Initializing logic threshold matrix...",
         "[-] Mounting Adelaide local server cluster...",
-        "[-] Sourcing active Spotify frame handshake...",
+        "[-] Bypassing external DRM protocols...",
         "[-] Verifying local user configuration rules...",
         "[-] System core diagnostic path verified safe."
     ];
     
     let sIdx = 0;
-    const stage1Interval = setInterval(() => {
+    stage1Interval = setInterval(() => {
         if (sIdx < stage1Commands.length) {
             appendTerminalLine(log1Target, `> ${stage1Commands[sIdx]}`);
             sIdx++;
@@ -196,28 +266,24 @@
         }
     }, 800);
 
-    // Transition trigger precisely at 6.0 seconds
-    setTimeout(() => {
+    stage1Timeout = setTimeout(() => {
+        if(!isBooting) return;
         clearInterval(stage1Interval);
-        
-        // Execute physical hardware screen flash
         document.body.classList.add('flash-active');
-        
         document.getElementById('stage-1').style.display = 'none';
         document.getElementById('stage-2').style.display = 'block';
-        
         setTimeout(() => document.body.classList.remove('flash-active'), 200);
-        
         runStage2();
     }, 6000);
 
-    // STAGE 2 LOGIC: Rapid terminal input cascade (Runs for exactly 4000ms)
+    // STAGE 2 LOGIC (4000ms)
     function runStage2() {
+        if(!isBooting) return;
         const log2Target = "log-2";
         const modules = ["SYS", "KERN", "NET", "MMU", "DRV", "API", "UI"];
         const hexCodes = ["0x3F", "0xA1", "0xBC", "0xFF", "0x00", "0x7E", "0x4D"];
         
-        const stage2Interval = setInterval(() => {
+        stage2Interval = setInterval(() => {
             const randomModule = modules[Math.floor(Math.random() * modules.length)];
             const randomHex = Math.floor(Math.random() * 65535).toString(16).toUpperCase();
             const randomStatus = hexCodes[Math.floor(Math.random() * hexCodes.length)];
@@ -226,20 +292,20 @@
             appendTerminalLine(log2Target, layout, 25);
         }, 50);
 
-        setTimeout(() => {
+        stage2Timeout = setTimeout(() => {
+            if(!isBooting) return;
+            isBooting = false;
             clearInterval(stage2Interval);
             document.getElementById('stage-2').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
         }, 4000);
     }
 
-    // DASHBOARD CORE ENGINES
-    // 1. Clock Router
+    // DASHBOARD ENGINES
     setInterval(() => {
         document.getElementById('time').innerText = new Date().toLocaleTimeString();
     }, 1000);
 
-    // 2. Word of the Day (WOTD) Randomizer Array
     const wotdList = [
         { w: "PROFOUND", d: "Having deep insight or knowledge." },
         { w: "VOLATILE", d: "Liable to change rapidly and unpredictably." },
@@ -250,7 +316,6 @@
     const pickedWotd = wotdList[Math.floor(Math.random() * wotdList.length)];
     document.getElementById('wotd').innerText = `${pickedWotd.w} - ${pickedWotd.d}`;
 
-    // 3. Logic Threshold Emotion Engine
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(response => response.json())
         .then(data => {
@@ -269,7 +334,6 @@
             } else {
                 parsedEmotion = "RESTLESS";
             }
-
             document.getElementById('weather').innerText = `${currentTemp}°C`;
             document.getElementById('mood').innerText = parsedEmotion;
         })
@@ -277,18 +341,55 @@
             document.getElementById('mood').innerText = "APATHETIC";
         });
 
-    // 4. Spotify Embedded Playlist Cycling Array
-    const playlistLinks = [
-        "https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator",
-        "https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator",
-        "https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator",
-        "https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator"
+    // LOCAL AUDIO ENGINE
+    const localTracks = [
+        { file: "song1.mp3", name: "TRACK_01_ALPHA" },
+        { file: "song2.mp3", name: "TRACK_02_BRAVO" },
+        { file: "song3.mp3", name: "TRACK_03_CHARLIE" }
     ];
-    let routeIdx = -1;
     
-    function cyclePlaylist() {
-        routeIdx = (routeIdx + 1) % playlistLinks.length;
-        document.getElementById('player').src = playlistLinks[routeIdx];
+    let currentTrackIdx = 0;
+    const player = document.getElementById('local-player');
+    const playBtn = document.getElementById('play-btn');
+    const trackDisplay = document.getElementById('track-display');
+
+    function loadTrack(idx) {
+        player.src = localTracks[idx].file;
+        trackDisplay.innerText = localTracks[idx].name;
+    }
+
+    function togglePlay() {
+        if (!player.src) loadTrack(currentTrackIdx);
+        
+        if (player.paused) {
+            player.play();
+            playBtn.innerText = "[ PAUSE ]";
+            playBtn.style.background = "var(--accent)";
+            playBtn.style.color = "#000";
+        } else {
+            player.pause();
+            playBtn.innerText = "[ PLAY ]";
+            playBtn.style.background = "#000";
+            playBtn.style.color = "var(--accent)";
+        }
+    }
+
+    function nextTrack() {
+        currentTrackIdx = (currentTrackIdx + 1) % localTracks.length;
+        loadTrack(currentTrackIdx);
+        player.play();
+        playBtn.innerText = "[ PAUSE ]";
+        playBtn.style.background = "var(--accent)";
+        playBtn.style.color = "#000";
+    }
+
+    function prevTrack() {
+        currentTrackIdx = (currentTrackIdx - 1 + localTracks.length) % localTracks.length;
+        loadTrack(currentTrackIdx);
+        player.play();
+        playBtn.innerText = "[ PAUSE ]";
+        playBtn.style.background = "var(--accent)";
+        playBtn.style.color = "#000";
     }
 </script>
 </body>
