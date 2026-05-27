@@ -6,19 +6,19 @@
 <title>VIBE_CORE_MOBILE</title>
 <style>
     :root { --bg: #050505; --text: #FFFFFF; }
-    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 10px; }
+    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
     
-    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 15px; background: #050505; z-index: 9999; display: flex; flex-direction: column-reverse; overflow: hidden; }
-    .line { font-size: 13px; margin-bottom: 4px; white-space: nowrap; }
+    /* Centered Terminal */
+    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; display: flex; flex-direction: column-reverse; overflow: hidden; justify-content: center; }
+    .line { font-size: 14px; margin-bottom: 6px; text-align: left; width: 90%; max-width: 400px; margin: 0 auto; }
     
-    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; display: flex; flex-direction: column; gap: 10px; }
+    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; width: 100%; max-width: 400px; }
     @keyframes reveal { to { opacity: 1; } }
     
-    .card { background: #1a1a1a; padding: 12px; border-radius: 8px; font-size: 12px; }
-    .status-bar { background: #000; padding: 10px; border: 1px solid #333; border-radius: 8px; text-align: center; }
+    .card { background: #1a1a1a; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; }
+    .status-bar { background: #000; padding: 10px; border: 1px solid #333; border-radius: 8px; text-align: center; margin-bottom: 10px; }
     
-    /* Stacked lists for vertical mobile fit */
-    .list-title { font-weight: bold; margin-top: 10px; border-bottom: 1px solid #555; padding-bottom: 2px; }
+    .list-title { font-weight: bold; margin-top: 10px; border-bottom: 1px solid #555; }
     .list-item { padding: 4px 0; border-bottom: 1px solid #222; }
     
     iframe { width: 100%; border: none; border-radius: 8px; }
@@ -49,4 +49,28 @@
         <div class="list-item">4. Avatar: Frontiers: 85.1 hrs</div>
         <div class="list-item">5. Crimson Desert: 63.0 hrs</div>
         
-        <div class="list-title">[RECENTLY
+        <div class="list-title">[RECENTLY PLAYED]</div>
+        <div class="list-item">Mortal Kombat 1 (23 May)</div>
+        <div class="list-item">Gamble w/ Friends (9 May)</div>
+        <div class="list-item">Titanfall 2 (9 May)</div>
+        <div class="list-item">Content Warning (6 May)</div>
+        <div class="list-item">Batman: Arkham (2 May)</div>
+    </div>
+</div>
+
+<script>
+    // 1. Terminal with Randomized System Log Messages
+    const log = document.getElementById('log');
+    const bootSteps = ["DEBUG:INIT", "SYS:CHECK", "CPU:FREQ", "RAM:ALLOC", "NET:AUTH", "DB:SYNC", "API:LOAD", "UI:RENDER", "AUTH:TOKEN"];
+    for(let i=0; i<150; i++) {
+        setTimeout(() => {
+            if (log.children.length > 20) log.removeChild(log.firstChild);
+            const el = document.createElement('div');
+            el.className = 'line';
+            const step = bootSteps[Math.floor(Math.random()*bootSteps.length)];
+            const hex = Math.floor(Math.random()*16777215).toString(16).toUpperCase();
+            el.innerText = `[${new Date().toLocaleTimeString()}] ${step} 0x${hex} OK`;
+            log.appendChild(el);
+        }, i * 50); 
+    }
+    setTimeout(() => {
