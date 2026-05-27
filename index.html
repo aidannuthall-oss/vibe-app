@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE_v3.1</title>
+    <title>VIBE_CORE_v3.2</title>
     <style>
         :root { 
             --accent: #00D4FF; 
@@ -18,7 +18,6 @@
             padding: 15px; 
             margin: 0; 
             overflow-x: hidden;
-            /* Prevent text selection when double tapping to skip */
             user-select: none; 
             -webkit-user-select: none;
         }
@@ -73,7 +72,6 @@
             transition: transform 0.1s ease, border-color 0.2s ease;
         }
         
-        /* Clickable Window Style for IG */
         .clickable-window {
             cursor: pointer;
             text-align: center;
@@ -97,7 +95,19 @@
             padding-bottom: 4px;
         }
 
-        /* Launcher & Audio Buttons */
+        /* Dynamic File Directory Elements */
+        .directory-row {
+            padding: 10px 5px;
+            border-bottom: 1px dashed #222222;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .directory-row:active {
+            color: var(--accent);
+        }
+
         button { 
             background: #000000; 
             color: var(--accent); 
@@ -179,8 +189,20 @@
 
     <div class="bubble-module">
         <div class="list-header">[LOCAL_AUDIO_DAEMON]</div>
-        <div><span class="accent">TRACK:</span> <span id="track-display">SYSTEM_IDLE</span></div>
+        
+        <div style="margin-bottom: 12px;">
+            <div><span class="accent">TARGET_DIR:</span> <span id="dir-display">/root</span></div>
+            <div><span class="accent">ACTIVE_TRK:</span> <span id="track-display">SYSTEM_IDLE</span></div>
+        </div>
+        
         <audio id="local-player" style="display:none;" onended="nextTrack()"></audio>
+
+        <div id="directory-view" style="max-height: 180px; overflow-y: auto; margin-bottom: 10px;">
+            </div>
+        
+        <div id="directory-back-btn" style="display: none; margin-bottom: 10px;">
+            <button onclick="renderFolderView()">[ .. BACK TO ROOT ]</button>
+        </div>
         
         <div class="audio-controls">
             <button onclick="prevTrack()">[ |<< ]</button>
@@ -195,13 +217,13 @@
             <button onclick="window.location.href='https://open.spotify.com/collection/playlists'">SPOTIFY_SYS</button>
             <button onclick="window.location.href='https://discord.com/app'">DISCORD</button>
             <button onclick="window.location.href='https://youtube.com'">YOUTUBE</button>
-            <button onclick="window.location.href='https://reddit.com'">REDDIT</button>
+            <button onclick="window.location.href='steam://open/main'">STEAM</button>
         </div>
     </div>
 </div>
 
 <script>
-    // GLOBAL BOOT TIMERS (Accessible for the skip function)
+    // GLOBAL BOOT TIMERS
     let stage1Interval, stage1Timeout, stage2Interval, stage2Timeout;
     let isBooting = true;
 
@@ -301,7 +323,7 @@
         }, 4000);
     }
 
-    // DASHBOARD ENGINES
+    // DASHBOARD CORE CLOCK & ENVIRONMENT ENGINES
     setInterval(() => {
         document.getElementById('time').innerText = new Date().toLocaleTimeString();
     }, 1000);
@@ -341,25 +363,108 @@
             document.getElementById('mood').innerText = "APATHETIC";
         });
 
-    // LOCAL AUDIO ENGINE
-    const localTracks = [
-        { file: "song1.mp3", name: "TRACK_01_ALPHA" },
-        { file: "song2.mp3", name: "TRACK_02_BRAVO" },
-        { file: "song3.mp3", name: "TRACK_03_CHARLIE" }
+    // -----------------------------------------------------------------
+    // PROGRAMMABLE FOUR-FOLDER AUDIO SYSTEM DATA STRUCTURE
+    // Add file names and track labels inside these lists as you collect files.
+    // -----------------------------------------------------------------
+    const playlistFolders = [
+        {
+            folderName: "PLAYLIST_0",
+            tracks: [
+                { file: "p0_song1.mp3", name: "P0_TRK_ALPHA" },
+                { file: "p0_song2.mp3", name: "P0_TRK_BRAVO" }
+            ]
+        },
+        {
+            folderName: "PLAYLIST_1",
+            tracks: [
+                { file: "p1_song1.mp3", name: "P1_TRK_ALPHA" }
+            ]
+        },
+        {
+            folderName: "PLAYLIST_2",
+            tracks: [
+                { file: "p2_song1.mp3", name: "P2_TRK_ALPHA" }
+            ]
+        },
+        {
+            folderName: "PLAYLIST_3",
+            tracks: [
+                { file: "p3_song1.mp3", name: "P3_TRK_ALPHA" }
+            ]
+        }
     ];
     
+    let activeFolderIdx = null;
     let currentTrackIdx = 0;
+    
     const player = document.getElementById('local-player');
     const playBtn = document.getElementById('play-btn');
     const trackDisplay = document.getElementById('track-display');
+    const dirDisplay = document.getElementById('dir-display');
+    const dirView = document.getElementById('directory-view');
+    const backBtn = document.getElementById('directory-back-btn');
 
-    function loadTrack(idx) {
-        player.src = localTracks[idx].file;
-        trackDisplay.innerText = localTracks[idx].name;
+    // Build the Primary Parent Folder Directory Layout
+    function renderFolderView() {
+        activeFolderIdx = null;
+        dirDisplay.innerText = "/root";
+        backBtn.style.display = "none";
+        dirView.innerHTML = "";
+        
+        playlistFolders.forEach((folder, index) => {
+            const row = document.createElement('div');
+            row.className = "directory-row";
+            row.innerHTML = `<span>📁 ${folder.folderName}/</span> <span class="accent">[${folder.tracks.length} OBJ]</span>`;
+            row.onclick = () => renderFileView(index);
+            dirView.appendChild(row);
+        });
+    }
+
+    // Drill down inside a targeted folder array object
+    function renderFileView(folderIdx) {
+        activeFolderIdx = folderIdx;
+        const currentFolder = playlistFolders[folderIdx];
+        dirDisplay.innerText = `/root/${currentFolder.folderName}`;
+        backBtn.style.display = "block";
+        dirView.innerHTML = "";
+        
+        if(currentFolder.tracks.length === 0 || currentFolder.tracks[0].file === "") {
+            dirView.innerHTML = `<div style="padding: 10px; color: #555;">[ DIRECTORY EMPTY ]</div>`;
+            return;
+        }
+
+        currentFolder.tracks.forEach((track, index) => {
+            const row = document.createElement('div');
+            row.className = "directory-row";
+            row.innerHTML = `<span>🎵 ${track.name}</span> <span class="accent">.MP3</span>`;
+            row.onclick = () => selectAndPlayTrack(index);
+            dirView.appendChild(row);
+        });
+    }
+
+    function selectAndPlayTrack(trackIdx) {
+        currentTrackIdx = trackIdx;
+        const activeTrack = playlistFolders[activeFolderIdx].tracks[currentTrackIdx];
+        
+        player.src = activeTrack.file;
+        trackDisplay.innerText = `${playlistFolders[activeFolderIdx].folderName} -> ${activeTrack.name}`;
+        
+        player.play();
+        playBtn.innerText = "[ PAUSE ]";
+        playBtn.style.background = "var(--accent)";
+        playBtn.style.color = "#000";
     }
 
     function togglePlay() {
-        if (!player.src) loadTrack(currentTrackIdx);
+        if (activeFolderIdx === null) {
+            // If no folder is selected, automatically default launch the first setup
+            activeFolderIdx = 0;
+        }
+        if (!player.src) {
+            selectAndPlayTrack(0);
+            return;
+        }
         
         if (player.paused) {
             player.play();
@@ -375,22 +480,21 @@
     }
 
     function nextTrack() {
-        currentTrackIdx = (currentTrackIdx + 1) % localTracks.length;
-        loadTrack(currentTrackIdx);
-        player.play();
-        playBtn.innerText = "[ PAUSE ]";
-        playBtn.style.background = "var(--accent)";
-        playBtn.style.color = "#000";
+        if (activeFolderIdx === null) return;
+        const totalTracks = playlistFolders[activeFolderIdx].tracks.length;
+        currentTrackIdx = (currentTrackIdx + 1) % totalTracks;
+        selectAndPlayTrack(currentTrackIdx);
     }
 
     function prevTrack() {
-        currentTrackIdx = (currentTrackIdx - 1 + localTracks.length) % localTracks.length;
-        loadTrack(currentTrackIdx);
-        player.play();
-        playBtn.innerText = "[ PAUSE ]";
-        playBtn.style.background = "var(--accent)";
-        playBtn.style.color = "#000";
+        if (activeFolderIdx === null) return;
+        const totalTracks = playlistFolders[activeFolderIdx].tracks.length;
+        currentTrackIdx = (currentTrackIdx - 1 + totalTracks) % totalTracks;
+        selectAndPlayTrack(currentTrackIdx);
     }
+
+    // Initialize Root Directory UI State on application lifecycle creation
+    renderFolderView();
 </script>
 </body>
 </html>
