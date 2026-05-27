@@ -3,85 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE_FINAL</title>
+    <title>VIBE_CORE_BOOT</title>
     <style>
+        :root { --accent: #00D4FF; } /* The Pop of Colour */
         body { background: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 10px; font-size: 16px; margin: 0; }
-        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 9999; padding: 20px; }
-        .module { border: 1px dashed #555; padding: 10px; margin-bottom: 10px; }
+        
+        #stage-1, #stage-2 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 9999; padding: 20px; }
+        .accent { color: var(--accent); }
+        .module { border: 1px dashed var(--accent); padding: 10px; margin-bottom: 10px; }
         iframe { width: 100%; border: none; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-<div id="boot-screen">
-    <div id="log"></div>
+<div id="stage-1">
+    <div id="log-1"></div>
+</div>
+
+<div id="stage-2" style="display:none;">
+    <div id="log-2"></div>
 </div>
 
 <div id="dashboard" style="display:none;">
     <div class="module">
-        TIME: <span id="time">--:--</span><br>
-        WEATHER: <span id="weather">--</span><br>
-        MOOD: <span id="mood">--</span>
+        <span class="accent">TIME:</span> <span id="time">--:--</span><br>
+        <span class="accent">WEATHER:</span> <span id="weather">--</span><br>
+        <span class="accent">MOOD:</span> <span id="mood">--</span>
     </div>
 
     <div class="module">
-        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="300"></iframe>
-        <button onclick="cycle()" style="background:transparent; color:#fff; width:100%; cursor:pointer; padding:10px;">CYCLE PLAYLIST</button>
+        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="250"></iframe>
+        <button onclick="cycle()" style="background:transparent; color:var(--accent); border:1px solid var(--accent); width:100%; padding:10px;">CYCLE</button>
     </div>
 
     <div class="module">
-        <strong>[MOST PLAYED]</strong><br>
-        RDR2: 160.6h | Rust: 95.8h<br>
-        CP2077: 88.8h | Avatar: 85.1h<br>
-        Crimson Desert: 63.0h
+        <strong class="accent">[MOST PLAYED]</strong><br>
+        RDR2: 160.6h | Rust: 95.8h | CP2077: 88.8h
     </div>
     
     <div class="module">
-        <strong>[RECENTLY PLAYED]</strong><br>
-        No Man's Sky: 27 May<br>
-        Mortal Kombat 1: 23 May<br>
-        Titanfall 2: 9 May<br>
-        Content Warning: 6 May<br>
-        Batman: Arkham: 2 May
+        <strong class="accent">[RECENT]</strong><br>
+        No Man's Sky (27 May) | MK1 (23 May) | Titanfall 2 (9 May)
     </div>
 </div>
 
 <script>
-    // 1. High Speed Boot Sequence
-    const log = document.getElementById('log');
-    const lines = ["INIT KERNEL...", "SYNC STEAM_DB...", "MOUNT WEATHER_API...", "CALIBRATE VIBE...", "SYSTEM READY."];
-    let i = 0;
-    const boot = setInterval(() => {
-        if (i >= lines.length) {
-            document.getElementById('boot-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            clearInterval(boot);
-        } else {
-            log.innerHTML += `<div>> ${lines[i]}</div>`;
-            i++;
+    // STAGE 1: Slow load (800ms per line)
+    const log1 = document.getElementById('log-1');
+    const slow = ["Initializing Hardware...", "Verifying Integrity...", "Powering Vibe Core..."];
+    let s = 0;
+    const sInt = setInterval(() => {
+        log1.innerHTML += `<div>> ${slow[s]}</div>`; s++;
+        if(s >= slow.length) {
+            clearInterval(sInt);
+            document.getElementById('stage-1').style.display = 'none';
+            document.getElementById('stage-2').style.display = 'block';
+            runStage2();
         }
-    }, 100); 
+    }, 800);
 
-    // 2. Logic Engines
+    // STAGE 2: Rapid Jumble (50ms per line)
+    function runStage2() {
+        const log2 = document.getElementById('log-2');
+        const rapid = ["KERN_A", "SYNC_B", "NET_C", "RAM_D", "IO_E", "VIBE_F", "READY"];
+        let r = 0;
+        const rInt = setInterval(() => {
+            log2.innerHTML += `<div>> <span class="accent">${rapid[r]}</span>_0x${Math.floor(Math.random()*999)}</div>`; r++;
+            if(r >= rapid.length) {
+                clearInterval(rInt);
+                document.getElementById('stage-2').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            }
+        }, 50);
+    }
+
+    // Logic
     setInterval(() => document.getElementById('time').innerText = new Date().toLocaleTimeString(), 1000);
-    
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(r => r.json()).then(d => {
             document.getElementById('weather').innerText = d.current.temperature_2m + "C";
             document.getElementById('mood').innerText = (d.current.temperature_2m > 20) ? "SOLAR" : "LUNAR";
         });
 
-    // 3. Spotify Cycler
-    const links = [
-        "https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator", 
-        "https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator", 
-        "https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator", 
-        "https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator"
-    ];
-    let idx = 0;
     function cycle() {
-        idx = (idx + 1) % links.length;
-        document.getElementById('player').src = links[idx];
+        const p = document.getElementById('player');
+        p.src = p.src.includes('0') ? 'https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator' : 'https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator';
     }
 </script>
 </body>
