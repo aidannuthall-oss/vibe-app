@@ -2,55 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Vibe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Dashboard</title>
 <style>
-    :root { --bg: #080808; --surface: #111111; --border: rgba(255,255,255,0.06); --text: #f5f5f5; --accent: #c8ff00; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
-    .vibe-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
-    .vibe-card-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 10px; }
-    
-    /* Responsive Spotify Container */
-    .spotify-container { display: flex; flex-direction: column; gap: 15px; }
-    iframe { border-radius: 12px; width: 100%; border: none; }
-    
+    :root { --bg: #080808; --surface: #111111; --text: #f5f5f5; --accent: #c8ff00; }
+    body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; margin: 0; }
+    .vibe-card { background: var(--surface); border: 1px solid #333; border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+    iframe { width: 100%; border: none; border-radius: 12px; }
     button { background: var(--accent); border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    #result { margin-top: 15px; color: #888; font-size: 14px; }
+    #result { margin-top: 15px; color: #888; }
 </style>
 </head>
 <body>
 
     <div class="vibe-card">
-        <div class="vibe-card-label">My Music Library</div>
-        <div class="spotify-container">
-            <iframe src="https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator" height="352" allow="encrypted-media"></iframe>
-            <iframe src="https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator" height="352" allow="encrypted-media"></iframe>
-            <iframe src="https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator" height="352" allow="encrypted-media"></iframe>
-        </div>
+        <div id="live-clock" style="font-size: 24px; font-weight: bold;">--:--:--</div>
     </div>
 
     <div class="vibe-card">
-        <div class="vibe-card-label">Steam Library Status</div>
+        <iframe src="https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator" height="152"></iframe>
+        <iframe src="https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator" height="152" style="margin-top:10px;"></iframe>
+    </div>
+
+    <div class="vibe-card">
         <iframe src="https://steamid.uk/profile/76561199709660579" height="300"></iframe>
     </div>
 
     <div class="vibe-card">
-        <div class="vibe-card-label">Vibe Check</div>
-        <button onclick="getRecommendation()">Give me a suggestion</button>
-        <div id="result">Click the button for a Vibe check.</div>
+        <button onclick="getRecommendation()">Get Vibe Check</button>
+        <div id="result">Click for a vibe check.</div>
     </div>
 
 <script>
-    const SUGGESTIONS = [
-        "Load up your top Steam game and zone out.",
-        "Your Spotify library is loaded—pick a playlist and go.",
-        "It's a high-energy day: Competitive mode enabled.",
-        "Clear your Steam backlog—try that game you haven't touched in a week."
-    ];
+    function updateClock() {
+        document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
     function getRecommendation() {
-        const display = document.getElementById('result');
-        display.innerText = SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)];
+        const SUGGESTIONS = ["Zone out with a game.", "Listen to your top playlist.", "Focus mode: On.", "Take a break, you've earned it."];
+        document.getElementById('result').innerText = SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)];
     }
 </script>
 </body>
