@@ -2,21 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VIBE_CORE_FINAL</title>
 <style>
     :root { --bg: #050505; --text: #00FF41; }
     body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
     
-    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; overflow: hidden; }
-    .line { font-size: 10px; white-space: nowrap; }
+    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; overflow-y: scroll; }
+    .line { font-size: 10px; white-space: nowrap; margin-bottom: 2px; }
     
     #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; }
     @keyframes reveal { to { opacity: 1; } }
     
     .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
     iframe { width: 100%; border: none; border-radius: 4px; }
-    button { background: #00FF41; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; font-family: monospace; margin-top: 10px; }
+    button { background: #00FF41; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -24,38 +23,37 @@
 <div id="terminal"><div id="log"></div></div>
 
 <div id="dashboard">
-    <div class="card" id="vibe-window">VIBE: ANALYZING...</div>
+    <div class="card" style="font-size: 18px; font-weight: bold;">> VIBE_CORE_ACTIVE</div>
+    <div class="card" id="vibe-window">ANALYZING WEATHER_DATA...</div>
     <div class="card">
-        <iframe id="spotify-player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator&theme=0" height="352"></iframe>
+        <iframe id="spotify-player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="352"></iframe>
         <button onclick="cycle()">CYCLE_PLAYLIST</button>
     </div>
-    <div class="card" id="steam-probs">STEAM_PROBABILITY_ENGINE: LOADING...</div>
+    <div class="card" id="steam-probs">LOADING_STEAM_ENGINE...</div>
 </div>
 
 <script>
-    // 1. High Speed Terminal
+    // 1. High Speed Scrolling Terminal (400 Lines)
     const log = document.getElementById('log');
-    const junk = ["SYS", "MEM", "CPU", "NET", "AUTH", "KERN", "DISK", "BUS", "IRQ", "DMA"];
-    for(let i=0; i<200; i++) {
+    const junk = ["SYS", "MEM", "CPU", "NET", "AUTH", "KERN", "DISK", "BUS", "IRQ", "DMA", "GPU", "IO"];
+    for(let i=0; i<400; i++) {
         setTimeout(() => {
             const el = document.createElement('div');
             el.className = 'line';
             el.innerText = `> ${junk[Math.floor(Math.random()*junk.length)]}_${Math.random().toString(36).substring(7).toUpperCase()}: [OK]`;
             log.appendChild(el);
-        }, i * 45); 
+            log.scrollTop = log.scrollHeight;
+        }, i * 25); 
     }
-    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 9500);
+    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 10000);
 
-    // 2. Vibe Engine (Weather + Time)
+    // 2. Weather Engine
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(r => r.json()).then(d => {
-            const temp = d.current.temperature_2m;
-            const hour = new Date().getHours();
-            const mode = (hour > 20 || hour < 6) ? "NIGHT" : (temp > 22 ? "DAY_ACTIVE" : "DAY_CHILL");
-            document.getElementById('vibe-window').innerText = `VIBE: ${mode} | ${temp}°C`;
+            document.getElementById('vibe-window').innerText = `VIBE: ADELAIDE_TEMP: ${d.current.temperature_2m}°C`;
         });
 
-    // 3. Steam Probability Engine
+    // 3. Steam Probability (Update hours manually in the code below to refresh stats)
     const steamLibrary = [
         {name: "Cyberpunk 2077", hours: 120}, {name: "Elden Ring", hours: 85}, 
         {name: "Baldur's Gate 3", hours: 200}, {name: "CS2", hours: 500}, 
@@ -65,8 +63,13 @@
     document.getElementById('steam-probs').innerHTML = "TOP_PLAY_PROBABILITY:<br>" + 
         steamLibrary.map(g => `${g.name}: ${Math.round((g.hours/total)*100)}%`).join('<br>');
 
-    // 4. Playlist Cycler
-    const links = ["https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator&theme=0", "http://googleusercontent.com/spotify.com/5"];
+    // 4. All four links grouped in the cycler
+    const links = [
+        "https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator", 
+        "https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator", 
+        "https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator", 
+        "https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator"
+    ];
     let idx = 0;
     function cycle() { idx = (idx + 1) % links.length; document.getElementById('spotify-player').src = links[idx]; }
 </script>
