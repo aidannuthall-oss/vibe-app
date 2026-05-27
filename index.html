@@ -2,60 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIBE_CORE</title>
 <style>
-    body { background: #050505; color: #00FF41; font-family: 'Courier New', monospace; margin: 0; }
+    :root { --bg: #050505; --text: #00FF41; }
+    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
     
-    /* The Rugged Loader */
-    #terminal {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        padding: 20px; box-sizing: border-box; overflow: hidden;
-        z-index: 9999; background: #050505;
-    }
-    
-    /* The Dashboard - Hidden until boot */
-    #dashboard { opacity: 0; animation: reveal 0.5s ease 10s forwards; padding: 20px; }
+    /* Terminal Styles */
+    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; }
+    .line { margin-bottom: 8px; font-size: 14px; opacity: 0; animation: fadein 0.3s forwards; }
+    @keyframes fadein { to { opacity: 1; } }
+
+    /* Dashboard Styles */
+    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; }
     @keyframes reveal { to { opacity: 1; } }
 
-    .line { margin-bottom: 5px; opacity: 0; animation: typing 0.5s forwards; }
-    @keyframes typing { to { opacity: 1; } }
+    .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 4px; padding: 15px; margin-bottom: 15px; }
+    iframe { width: 100%; border: none; border-radius: 4px; }
+    button { background: #00FF41; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; font-family: monospace; }
 </style>
 </head>
 <body>
 
-<div id="terminal">
-    <div id="log"></div>
-</div>
+<div id="terminal"><div id="log"></div></div>
 
 <div id="dashboard">
-    <h1>VIBE_CORE_ACTIVE</h1>
+    <div class="card">
+        <div id="clock">--:--:--</div>
+        <div id="weather">Loading weather...</div>
+    </div>
+
+    <div class="card">
+        <iframe id="spotify-player" src="YOUR_FIRST_LINK" height="352"></iframe>
+        <button onclick="cycle()" style="margin-top:10px;">CYCLE_PLAYLIST</button>
+    </div>
+
+    <div class="card">
+        <a href="https://steamcommunity.com/profiles/76561199709660579" target="_blank">
+            <button>ACCESS_STEAM_PROFILE</button>
+        </a>
+    </div>
 </div>
 
 <script>
+    // 1. BOOT SEQUENCE
     const log = document.getElementById('log');
     const lines = [
-        "INITIALIZING VIBE_CORE...",
-        "CONNECTING TO STEAM_API_NODE...",
-        "AUTHENTICATING USER_ID: 76561199709660579...",
-        "SYNCING SPOTIFY_EMBED_MODULES...",
-        "CALIBRATING WEATHER_API_ADELAIDE...",
-        "LOADING PERSONAL_PREFERENCES...",
-        "CHECKING FOR SYSTEM_VULNERABILITIES...",
-        "VIBE_CORE_READY."
+        "BOOTING_SYSTEM...", "LOADING KERNEL...", "MOUNTING_DRIVE_01...", 
+        "CONNECTING TO NETWORK...", "IP: 192.168.1.105...", "SYNCING_STEAM_ID: 76561199709660579...", 
+        "RESOLVING_ADELAIDE_WEATHER...", "CONFIGURING_SOUND_DRIVERS...", 
+        "ENCRYPTING_SESSION...", "ACCESS_GRANTED_VIBE_CORE_READY."
     ];
-
-    lines.forEach((text, i) => {
+    lines.forEach((t, i) => {
         setTimeout(() => {
-            const el = document.createElement('div');
-            el.className = 'line';
-            el.innerText = "> " + text;
-            log.appendChild(el);
-        }, i * 1200); // Staggers the lines over ~10 seconds
+            const el = document.createElement('div'); el.className = 'line';
+            el.innerText = "> " + t; log.appendChild(el);
+        }, i * 950);
     });
+    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 10000);
 
-    // Hide terminal after 10s
-    setTimeout(() => {
-        document.getElementById('terminal').style.display = 'none';
-    }, 10000);
+    // 2. DASHBOARD LOGIC
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
+        .then(r => r.json()).then(d => document.getElementById('weather').innerText = `ADELAIDE: ${d.current.temperature_2m}°C`);
+
+    const links = ["YOUR_LINK_1", "YOUR_LINK_2", "YOUR_LINK_3"];
+    let i = 0;
+    function cycle() { i = (i + 1) % links.length; document.getElementById('spotify-player').src = links[i]; }
 </script>
 </body>
 </html>
