@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vibe">
+<meta name="theme-color" content="#080808">
+<title>Vibe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #080808;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f5f5f5;
+  --text2: #888;
+  --text3: #444;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --accent: #c8ff00;
+  --accent-dim: rgba(200,255,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; background: var(--bg);
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-weight: 300; overflow: hidden;
+}
+
+#app {
+  display: flex; flex-direction: column;
+  height: 100%; height: 100dvh;
+}
+
+/* SCREENS */
+.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ── VIBE SCREEN ── */
+#vibe-screen {
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 90px);
+}
+
+.vibe-header {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; margin-bottom: 32px;
+}
+
+.vibe-greeting {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text2);
+}
+
+.vibe-date {
+  font-size: 12px; color: var(--text3);
+  text-align: right; line-height: 1.6;
+}
+
+.vibe-word-section { margin-bottom: 28px; }
+
+.vibe-word {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(52px, 15vw, 72px);
+  font-weight: 800; line-height: 0.95;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--word-color1, #fff) 0%, var(--word-color2, #888) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.vibe-word-def {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6; max-width: 280px;
+}
+
+.vibe-cards {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 24px;
+}
+
+.vibe-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.vibe-card-label {
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 10px;
+}
+
+.vibe-card-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 600;
+  color: var(--text); line-height: 1.3;
+}
+
+.vibe-card-sub {
+  font-size: 12px; color: var(--text2);
+  margin-top: 4px;
+}
+
+.color-swatch {
+  width: 100%; height: 64px;
+  border-radius: 10px; margin-bottom: 10px;
+}
+
+.color-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 600;
+}
+
+.color-hex { font-size: 11px; color: var(--text2); margin-top: 2px; font-family: monospace; }
+
+.vibe-mood-bar {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 16px; padding: 16px;
+  margin-bottom: 24px;
+}
+
+.mood-label {
+  font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 12px;
+}
+
+.mood-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.mood-tag {
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 0.5px solid var(--border2);
+  font-size: 12px; color: var(--text2);
+  background: var(--surface2);
+}
+
+.mood-tag.primary {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.chat-cta {
+  background: var(--accent);
+  border: none; border-radius: 14px;
+  padding: 16px; width: 100%;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #080808; cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.chat-cta:active { opacity: 0.85; transform: scale(0.98); }
+
+.refresh-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; width: 100%; margin-top: 10px;
+  background: none; border: 0.5px solid var(--border);
+  border-radius: 14px; padding: 13px;
+  font-size: 13px; color: var(--text2);
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.refresh-btn:active { border-color: var(--border2); color: var(--text); }
+
+.loading-vibe {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1; gap: 16px; padding: 60px 20px;
+}
+
+.loading-dots { display: flex; gap: 6px; }
+
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%; background: var(--accent);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.loading-text {
+  font-size: 13px; color: var(--text3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* ── CHAT SCREEN ── */
+#chat-screen { background: var(--bg); }
+
+.chat-topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-back {
+  width: 36px; height: 36px;
+  border: none; background: none;
+  color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.chat-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700;
+  flex: 1;
+}
+
+.chat-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text2);
+}
+
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+#messages {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.msg {
+  max-width: 85%; display: flex;
+  flex-direction: column; gap: 4px;
+  animation: fadeUp 0.2s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user { align-self: flex-end; }
+.msg.ai { align-self: flex-start; }
+
+.msg-bubble {
+  padding: 11px 15px;
+  border-radius: 18px;
+  font-size: 15px; line-height: 1.5;
+  font-weight: 300;
+}
+
+.msg.user .msg-bubble {
+  background: var(--accent);
+  color: #080808;
+  border-bottom-right-radius: 4px;
+  font-weight: 400;
+}
+
+.msg.ai .msg-bubble {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+.msg-time {
+  font-size: 10px; color: var(--text3);
+  padding: 0 4px;
+}
+
+.msg.user .msg-time { text-align: right; }
+
+.typing-indicator {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 18px; border-bottom-left-radius: 4px;
+  padding: 13px 16px;
+  display: none;
+}
+
+.typing-indicator.visible { display: flex; gap: 4px; align-items: center; }
+
+.typing-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--text3);
+  animation: typingPulse 1s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingPulse {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
+.chat-input-bar {
+  display: flex; align-items: flex-end; gap: 10px;
+  padding: 10px 16px calc(var(--safe-bottom) + 10px);
+  border-top: 0.5px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+#chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 22px;
+  padding: 11px 16px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px; font-weight: 300;
+  outline: none; resize: none;
+  max-height: 120px; overflow-y: auto;
+  -webkit-appearance: none;
+  line-height: 1.4;
+}
+
+#chat-input::placeholder { color: var(--text3); }
+#chat-input:focus { border-color: var(--border2); }
+
+#send-btn {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: var(--accent); border: none;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+#send-btn:active { opacity: 0.8; transform: scale(0.94); }
+#send-btn:disabled { opacity: 0.3; }
+
+#send-btn svg { width: 18px; height: 18px; }
+
+/* BOTTOM NAV */
+#bottom-nav {
+  display: flex; background: var(--bg);
+  border-top: 0.5px solid var(--border);
+  padding: 8px 0 calc(var(--safe-bottom) + 8px);
+  flex-shrink: 0;
+}
+
+#bottom-nav.hidden { display: none; }
+
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  border: none; background: none;
+  color: var(--text3); font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.05em; cursor: pointer;
+  padding: 6px 0; transition: color 0.15s;
+}
+
+.nav-btn.active { color: var(--accent); }
+
+.nav-btn svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.5; stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* SUGGESTIONS */
+.suggestions {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding: 0 16px 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.suggestions::-webkit-scrollbar { display: none; }
+
+.suggestion-chip {
+  white-space: nowrap;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 100px;
+  font-size: 13px; color: var(--text2);
+  cursor: pointer; flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+
+.suggestion-chip:active { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- VIBE SCREEN -->
+  <div id="vibe-screen" class="screen active">
+    <div class="loading-vibe" id="vibe-loader">
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="loading-text">Reading the day...</div>
+    </div>
+    <div id="vibe-content" style="display:none">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- CHAT SCREEN -->
+  <div id="chat-screen" class="screen">
+    <div class="chat-topbar">
+      <button class="chat-back" onclick="showVibe()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="chat-title">Vibe AI</div>
+      <div class="chat-status">
+        <div class="status-dot"></div>
+        online
+      </div>
+    </div>
+
+    <div id="messages">
+      <div class="typing-indicator" id="typing">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">What music fits my vibe?</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">Games to play tonight?</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">Tell me something interesting</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">Give me a challenge today</div>
+    </div>
+
+    <div class="chat-input-bar">
+      <textarea id="chat-input" placeholder="Message..." rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button id="send-btn" onclick="sendMessage()" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav id="bottom-nav">
+    <button class="nav-btn active" id="nav-vibe" onclick="showVibe()">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Vibe
+    </button>
+    <button class="nav-btn" id="nav-chat" onclick="showChat()">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Chat
+    </button>
+  </nav>
+
+</div>
+
+<script>
+const API_URL = 'https://api.anthropic.com/v1/messages';
+let vibeData = null;
+let chatHistory = [];
+let isLoading = false;
+
+// ── VIBE COLORS ──
+const VIBE_PALETTES = [
+  { name: 'Electric Lime', hex: '#c8ff00', c1: '#c8ff00', c2: '#5a7a00' },
+  { name: 'Aurora Blue', hex: '#4fc3f7', c1: '#4fc3f7', c2: '#0a4a6e' },
+  { name: 'Dusk Rose', hex: '#f48fb1', c1: '#f48fb1', c2: '#7a2a4a' },
+  { name: 'Ember', hex: '#ff6b35', c1: '#ff6b35', c2: '#7a2200' },
+  { name: 'Void Purple', hex: '#b39ddb', c1: '#b39ddb', c2: '#3a2060' },
+  { name: 'Ice White', hex: '#e8f5e9', c1: '#ffffff', c2: '#9a9a9a' },
+  { name: 'Gold Rush', hex: '#ffd54f', c1: '#ffd54f', c2: '#7a5500' },
+  { name: 'Neon Mint', hex: '#69f0ae', c1: '#69f0ae', c2: '#005a30' },
+];
+
+const VIBE_WORDS = [
+  { word: 'Liminal', def: 'Occupying a position at or on both sides of a boundary or threshold.' },
+  { word: 'Sonder', def: 'The realization that each passerby has a life as vivid and complex as your own.' },
+  { word: 'Hiraeth', def: 'A homesickness for a home you cannot return to, or never was.' },
+  { word: 'Ephemeral', def: 'Lasting for a very short time. Here and then gone.' },
+  { word: 'Serendipity', def: 'Finding something good without looking for it.' },
+  { word: 'Numinous', def: 'Having a strong religious or spiritual quality; mysterious.' },
+  { word: 'Vellichor', def: 'The strange wistfulness of used bookshops.' },
+  { word: 'Kenopsia', def: 'The eerie quiet of a place that is usually busy.' },
+  { word: 'Chrysalism', def: 'The amniotic tranquility of being inside during a storm.' },
+  { word: 'Zenosyne', def: 'The sense that time keeps moving faster.' },
+  { word: 'Ineffable', def: 'Too great or extreme to be expressed in words.' },
+  { word: 'Catharsis', def: 'The release of strong emotions through art or experience.' },
+];
+
+const MOODS = [
+  ['Focused', 'Sharp', 'In the zone', 'Dialed'],
+  ['Chill', 'Low effort', 'Coasting', 'Mellow'],
+  ['Creative', 'Flowing', 'Inspired', 'Building'],
+  ['Restless', 'Searching', 'Wired', 'Moving'],
+  ['Reflective', 'Still', 'Inward', 'Quiet'],
+];
+
+function getDayIndex() {
+  const d = new Date();
+  return d.getDate() + d.getMonth() * 31;
+}
+
+function generateVibe() {
+  const idx = getDayIndex();
+  const palette = VIBE_PALETTES[idx % VIBE_PALETTES.length];
+  const wordObj = VIBE_WORDS[idx % VIBE_WORDS.length];
+  const moodSet = MOODS[idx % MOODS.length];
+  const now = new Date();
+  const hour = now.getHours();
+  let timeOfDay = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : hour < 21 ? 'Evening' : 'Night';
+
+  return { palette, wordObj, moodSet, timeOfDay };
+}
+
+function renderVibe() {
+  const loader = document.getElementById('vibe-loader');
+  const content = document.getElementById('vibe-content');
+
+  vibeData = generateVibe();
+  const { palette, wordObj, moodSet, timeOfDay } = vibeData;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-AU', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // Set CSS vars for word gradient
+  document.documentElement.style.setProperty('--word-color1', palette.c1);
+  document.documentElement.style.setProperty('--word-color2', palette.c2);
+  document.documentElement.style.setProperty('--accent', palette.hex);
+  document.documentElement.style.setProperty('--accent-dim', palette.hex + '15');
+
+  content.innerHTML = `
+    <div class="vibe-header">
+      <div class="vibe-greeting">Good ${timeOfDay}</div>
+      <div class="vibe-date">${dateStr}</div>
+    </div>
+
+    <div class="vibe-word-section">
+      <div class="vibe-word">${wordObj.word}</div>
+      <div class="vibe-word-def">${wordObj.def}</div>
+    </div>
+
+    <div class="vibe-cards">
+      <div class="vibe-card">
+        <div class="vibe-card-label">Today's colour</div>
+        <div class="color-swatch" style="background:${palette.hex}"></div>
+        <div class="color-name">${palette.name}</div>
+        <div class="color-hex">${palette.hex}</div>
+      </div>
+      <div class="vibe-card">
+        <div class="vibe-card-label">Energy</div>
+        <div style="font-size:36px; margin-bottom:8px">${getEnergyEmoji()}</div>
+        <div class="vibe-card-value">${moodSet[0]}</div>
+        <div class="vibe-card-sub">${timeOfDay} mode</div>
+      </div>
+    </div>
+
+    <div class="vibe-mood-bar">
+      <div class="mood-label">Today's frequencies</div>
+      <div class="mood-tags">
+        ${moodSet.map((m, i) => `<div class="mood-tag ${i === 0 ? 'primary' : ''}">${m}</div>`).join('')}
+      </div>
+    </div>
+
+    <button class="chat-cta" onclick="showChat(); sendVibeIntro()">Talk to Vibe AI →</button>
+    <button class="refresh-btn" onclick="location.reload()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      Refresh vibe
+    </button>
+  `;
+
+  loader.style.display = 'none';
+  content.style.display = 'block';
+}
+
+function getEnergyEmoji() {
+  const hour = new Date().getHours();
+  if (hour < 8) return '🌙';
+  if (hour < 12) return '☀️';
+  if (hour < 17) return '⚡';
+  if (hour < 21) return '🔥';
+  return '🌙';
+}
+
+// ── NAV ──
+function showVibe() {
+  document.getElementById('vibe-screen').classList.add('active');
+  document.getElementById('chat-screen').classList.remove('active');
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  document.getElementById('nav-vibe').classList.add('active');
+  document.getElementById('nav-chat').classList.remove('active');
+}
+
+function showChat() {
+  document.getElementById('chat-screen').classList.add('active');
+  document.getElementById('vibe-screen').classList.remove('active');
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  document.getElementById('nav-chat').classList.add('active');
+  document.getElementById('nav-vibe').classList.remove('active');
+  setTimeout(() => document.getElementById('chat-input').focus(), 100);
+}
+
+// ── CHAT ──
+function formatTime() {
+  return new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function addMessage(role, text) {
+  const messages = document.getElementById('messages');
+  const typing = document.getElementById('typing');
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
+    <div class="msg-time">${formatTime()}</div>
+  `;
+  messages.insertBefore(div, typing);
+  messages.scrollTop = messages.scrollHeight;
+  chatHistory.push({ role: role === 'user' ? 'user' : 'assistant', content: text });
+}
+
+function setTyping(show) {
+  document.getElementById('typing').classList.toggle('visible', show);
+  const messages = document.getElementById('messages');
+  messages.scrollTop = messages.scrollHeight;
+}
+
+async function sendVibeIntro() {
+  if (chatHistory.length > 0) return;
+  const { wordObj, moodSet, palette, timeOfDay } = vibeData;
+  const introPrompt = `You are Vibe AI — a sharp, cool, concise AI assistant. Today's vibe is: word of the day is "${wordObj.word}", colour is "${palette.name}", energy is "${moodSet[0]}". Greet the user with a short punchy welcome (2-3 sentences max) that references today's vibe subtly. Don't be cringe. Be cool and direct.`;
+
+  setTyping(true);
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are Vibe AI — a cool, sharp, direct AI assistant. Today's vibe context: word="${wordObj.word}", colour="${palette.name}", energy="${moodSet[0]}", time="${timeOfDay}". Keep replies concise and punchy. No fluff. No asterisks or markdown formatting.`,
+        messages: [{ role: 'user', content: introPrompt }]
+      })
+    });
+    const data = await res.json();
+    setTyping(false);
+    const reply = data.content?.[0]?.text || "Hey. What's good?";
+    addMessage('ai', reply);
+  } catch {
+    setTyping(false);
+    addMessage('ai', `${timeOfDay}. What's on your mind?`);
+  }
+}
+
+async function sendMessage(text) {
+  const input = document.getElementById('chat-input');
+  const msg = text || input.value.trim();
+  if (!msg || isLoading) return;
+
+  input.value = '';
+  autoResize(input);
+  document.getElementById('suggestions').style.display = 'none';
+
+  addMessage('user', msg);
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  setTyping(true);
+
+  const { wordObj, moodSet, palette, timeOfDay } = vibeData || generateVibe();
+  const systemPrompt = `You are Vibe AI — a sharp, direct, cool AI assistant. Today's vibe: word="${wordObj.word}", colour="${palette.name}", energy="${moodSet[0]}", time="${timeOfDay}". The user is a teenager who games and loves music. Be helpful, concise, and genuinely interesting. No corporate speak. No asterisks or markdown. Just talk like a person.`;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: chatHistory.filter(m => m.role === 'user' || m.role === 'assistant')
+      })
+    });
+    const data = await res.json();
+    setTyping(false);
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+    const reply = data.content?.[0]?.text || 'Something went wrong. Try again.';
+    addMessage('ai', reply);
+  } catch (err) {
+    setTyping(false);
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+    addMessage('ai', 'Connection failed. Check your internet.');
+  }
+}
+
+function sendSuggestion(el) {
+  sendMessage(el.textContent);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── INIT ──
+renderVibe();
+</script>
+</body>
+</html>
