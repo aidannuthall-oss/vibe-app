@@ -5,18 +5,19 @@
 <title>VIBE_CORE_FINAL</title>
 <style>
     :root { --bg: #050505; --text: #00FF41; }
-    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow: hidden; }
     
-    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; overflow-y: auto; }
-    .line { font-size: 16px; margin-bottom: 6px; border-left: 3px solid #00FF41; padding-left: 10px; }
+    /* Auto-scrolling, self-cleaning terminal */
+    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; overflow: hidden; }
+    .line { font-size: 20px; margin-bottom: 8px; border-left: 4px solid #00FF41; padding-left: 15px; }
     
-    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; }
+    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; height: 100vh; overflow-y: auto; padding-bottom: 50px; }
     @keyframes reveal { to { opacity: 1; } }
     
-    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
-    .status-bar { font-size: 14px; font-weight: bold; color: #fff; background: #222; padding: 10px; margin-bottom: 15px; border-radius: 4px; display: flex; justify-content: space-between; }
+    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+    .status-bar { font-size: 16px; font-weight: bold; background: #111; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; }
     iframe { width: 100%; border: none; border-radius: 4px; }
-    button { background: #00FF41; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; font-family: monospace; }
+    button { background: #00FF41; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -25,11 +26,9 @@
 
 <div id="dashboard">
     <div id="status-bar" class="status-bar">
-        <span>TIME: --:--</span>
-        <span>MOOD: CHILL</span>
-        <span>COLOUR: LIME</span>
-        <span>WORD: VIBE</span>
-        <span id="weather">WEATHER: ---</span>
+        <span id="time">TIME: --:--</span>
+        <span>MOOD: FOCUSED</span>
+        <span id="weather">WEATHER: LOADING...</span>
     </div>
     
     <div class="card">
@@ -37,46 +36,42 @@
         <button onclick="cycle()">CYCLE_PLAYLIST</button>
     </div>
     
-    <div class="card" id="steam-probs">LOADING_STEAM_ENGINE...</div>
+    <div class="card" style="display:flex; gap: 20px;">
+        <div id="top-games" style="flex:1;"><strong>MOST PLAYED:</strong></div>
+        <div id="recent-games" style="flex:1;"><strong>LAST 5 PLAYED:</strong></div>
+    </div>
 </div>
 
 <script>
-    // 1. High Speed Terminal
+    // 1. High Speed Auto-Scrolling Terminal
     const log = document.getElementById('log');
-    const logs = ["KERNEL_INIT: OK", "SYNCING_STEAM_API... DATA_RX", "WEATHER_SERVICE: CONNECTED", "MEM_ALLOC: 4096MB", "SCANNING_VULNERABILITIES... NONE"];
-    for(let i=0; i<150; i++) {
-        setTimeout(() => {
-            const el = document.createElement('div');
-            el.className = 'line';
-            el.innerText = `[${new Date().toLocaleTimeString()}] > ${logs[Math.floor(Math.random()*logs.length)]}`;
-            log.appendChild(el);
-            log.scrollTop = log.scrollHeight;
-        }, i * 60); 
+    function addLine(text) {
+        const el = document.createElement('div');
+        el.className = 'line';
+        el.innerText = `[${new Date().toLocaleTimeString()}] > ${text}`;
+        log.appendChild(el);
+        if (log.children.length > 15) log.removeChild(log.firstChild); // Delete old lines
     }
-    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 9500);
+    const msgs = ["INITIALIZING_CORE", "SYNCING_STEAM_DATA", "WEATHER_CALIBRATION", "MEMORY_FLUSH_COMPLETE"];
+    for(let i=0; i<100; i++) {
+        setTimeout(() => addLine(msgs[i % msgs.length]), i * 100);
+    }
+    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 10000);
 
-    // 2. Status Bar Update
+    // 2. Steam Data (Manually set for accuracy)
+    const topGames = ["CS2 (500h)", "BG3 (200h)", "Cyberpunk (120h)", "Elden Ring (85h)", "Stardew (40h)"];
+    const lastPlayed = ["Elden Ring", "CS2", "Cyberpunk", "Hollow Knight", "Terraria"];
+    document.getElementById('top-games').innerHTML += "<br>" + topGames.join("<br>");
+    document.getElementById('recent-games').innerHTML += "<br>" + lastPlayed.join("<br>");
+
+    // 3. Status Bar
     setInterval(() => {
-        const now = new Date();
-        document.querySelector('#status-bar span:nth-child(1)').innerText = `TIME: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        document.getElementById('time').innerText = `TIME: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     }, 1000);
-
-    // 3. Weather
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
-        .then(r => r.json()).then(d => {
-            document.getElementById('weather').innerText = `WEATHER: ${d.current.temperature_2m}°C`;
-        });
+        .then(r => r.json()).then(d => document.getElementById('weather').innerText = `WEATHER: ${d.current.temperature_2m}°C`);
 
-    // 4. Steam Data (Hardcoded based on your profile)
-    const steamLibrary = [
-        {name: "Cyberpunk 2077", hours: 120}, {name: "Elden Ring", hours: 85}, 
-        {name: "Baldur's Gate 3", hours: 200}, {name: "CS2", hours: 500}, {name: "Stardew", hours: 40}
-    ];
-    const total = steamLibrary.reduce((a, b) => a + b.hours, 0);
-    document.getElementById('steam-probs').innerHTML = "TOP_PLAY_PROBABILITY:<br>" + 
-        steamLibrary.map(g => `${g.name}: ${Math.round((g.hours/total)*100)}%`).join('<br>');
-
-    // 5. Playlist
+    // 4. Playlist
     const links = ["https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator", "https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator", "https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator", "https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator"];
     let idx = 0;
     function cycle() { idx = (idx + 1) % links.length; document.getElementById('spotify-player').src = links[idx]; }
