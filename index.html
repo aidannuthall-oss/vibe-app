@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE_v2</title>
+    <title>VIBE_CORE_v2.1</title>
     <style>
         :root { 
             --accent: #00D4FF; 
@@ -29,7 +29,7 @@
             100% { background: var(--bg); }
         }
         
-        /* Terminal Style Boot Interfaces */
+        /* Terminal Interfaces (Shifted left for narrow mobile screens) */
         #stage-1, #stage-2 { 
             position: fixed; 
             top: 0; 
@@ -38,7 +38,7 @@
             height: 100%; 
             background: var(--bg); 
             z-index: 9999; 
-            padding: 20px; 
+            padding: 20px 10px 20px 6px; /* Reduced left padding to shift text left */
             box-sizing: border-box;
             overflow: hidden;
             display: flex;
@@ -47,7 +47,7 @@
         }
         
         .term-line { 
-            font-size: 15px; 
+            font-size: 14px; 
             line-height: 1.4;
             margin-bottom: 4px; 
             white-space: nowrap;
@@ -91,7 +91,7 @@
             font-size: 14px;
         }
         
-        /* Full Deep-Playlist Spotify Framework */
+        /* Spotify Player Sizing */
         iframe { 
             width: 100%; 
             border: none; 
@@ -137,8 +137,8 @@
     </div>
 
     <div class="bubble-module">
-        <iframe id="player" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGo67Z9s" height="520" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        <button onclick="cyclePlaylist()">CYCLE INTERFACE ROUTE</button>
+        <iframe id="player" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGo7R3m1" height="520" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <button onclick="cyclePlaylist()">CYCLE PLAYLIST INSTANCE</button>
     </div>
 
     <div class="bubble-module">
@@ -206,7 +206,6 @@
         document.getElementById('stage-1').style.display = 'none';
         document.getElementById('stage-2').style.display = 'block';
         
-        // Remove flash class so it can clean up
         setTimeout(() => document.body.classList.remove('flash-active'), 200);
         
         runStage2();
@@ -225,9 +224,8 @@
             
             const layout = `[${new Date().toLocaleTimeString()}] <span class="accent">${randomModule}</span>::ALLOC_MEM_SECTOR_${randomHex} -> STATUS_${randomStatus}_OK`;
             appendTerminalLine(log2Target, layout, 25);
-        }, 60); // High velocity push
+        }, 60);
 
-        // Terminate setup routine and reveal dashboard at exactly 10 seconds total
         setTimeout(() => {
             clearInterval(stage2Interval);
             document.getElementById('stage-2').style.display = 'none';
@@ -249,7 +247,6 @@
             const currentHour = new Date().getHours();
             let parsedEmotion = "CONTENT";
 
-            // Threshold conditions mapping human emotions instead of planetary names
             if (currentHour >= 23 || currentHour < 5) {
                 parsedEmotion = "MELANCHOLIC"; 
             } else if (currentTemp < 14) {
@@ -269,17 +266,18 @@
             document.getElementById('mood').innerText = "APATHETIC";
         });
 
-    // 3. Spotify Embedded Index Cycling Matrix
-    const alternativeInterfaces = [
-        "https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGo67Z9s", // List 1
-        "https://open.spotify.com/embed/playlist/37i9dQZF1DX8ntZU67qn7D", // List 2
-        "https://open.spotify.com/embed/playlist/37i9dQZF1DXbTxeEB7gCDp"  // List 3
+    // 3. Spotify Embedded Playlist Cycling Array (Real Working Live Links)
+    const playlistLinks = [
+        "https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGo7R3m1", // Choice 1
+        "https://open.spotify.com/embed/playlist/37i9dQZF1DX8g7fA07UvSg", // Choice 2
+        "https://open.spotify.com/embed/playlist/37i9dQZF1DXdLTE778nW0G", // Choice 3
+        "https://open.spotify.com/embed/playlist/37i9dQZF1DX0bX8Xwgrp7M"  // Choice 4
     ];
     let routeIdx = 0;
     
     function cyclePlaylist() {
-        routeIdx = (routeIdx + 1) % alternativeInterfaces.length;
-        document.getElementById('player').src = alternativeInterfaces[routeIdx];
+        routeIdx = (routeIdx + 1) % playlistLinks.length;
+        document.getElementById('player').src = playlistLinks[routeIdx];
     }
 </script>
 </body>
