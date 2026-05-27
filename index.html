@@ -2,80 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE</title>
+    <title>BOOT_SEQ</title>
     <style>
-        body { background: #050505; color: #FFFFFF; font-family: 'Courier New', monospace; margin: 0; padding: 10px; font-size: 18px; }
-        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; padding: 10px; z-index: 999; }
-        .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; }
-        .module { margin: 10px 0; border: 1px dashed #555; padding: 5px; }
+        body { background: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 20px; }
+        .line { margin-bottom: 5px; }
     </style>
 </head>
 <body>
-
-<div id="boot-screen">
-    <div id="boot-log"></div>
-</div>
-
-<div id="dashboard">
-    <div class="module">
-        TIME: <span id="time">--:--</span><br>
-        WEATHER: <span id="weather">--</span><br>
-        MOOD: <span id="mood">--</span><br>
-        WOTD: <span id="wotd">--</span>
-    </div>
-
-    <div class="module">
-        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" width="100%" height="150" style="border:none;"></iframe>
-        <button onclick="cycle()" style="background:transparent; color:#fff; border:1px solid #fff; width:100%;">CYCLE</button>
-    </div>
-
-    <div class="module">
-        [MOST PLAYED]<br>
-        1. RDR2: 160h<br>2. Rust: 95h<br>3. CP2077: 88h<br>4. Avatar: 85h<br>5. Crimson: 63h
-    </div>
-    <div class="module">
-        [RECENT]<br>
-        MK1 | TF2 | Content Warning
-    </div>
-</div>
-
-<script>
-    // Raw Boot Logic
-    const log = document.getElementById('boot-log');
-    const bootLines = ["LOAD KERNEL...", "SYNC STEAM DB...", "CHECK VIBE...", "MOUNT DRIVE...", "INIT..."];
-    let i = 0;
-    const interval = setInterval(() => {
-        if (i >= bootLines.length) {
-            document.getElementById('boot-screen').style.display = 'none';
-            clearInterval(interval);
-        } else {
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.innerText = "> " + bootLines[i];
-            log.appendChild(line);
-            i++;
-        }
-    }, 800);
-
-    // Logic
-    setInterval(() => {
-        document.getElementById('time').innerText = new Date().toLocaleTimeString();
-    }, 1000);
-
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
-        .then(r => r.json()).then(d => {
-            const t = d.current.temperature_2m;
-            document.getElementById('weather').innerText = t + "C";
-            document.getElementById('mood').innerText = (t > 20) ? "SOLAR" : "LUNAR";
-        });
-    
-    document.getElementById('wotd').innerText = "LIMINAL";
-
-    function cycle() {
-        const p = document.getElementById('player');
-        p.src = p.src.includes('7') ? 'https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator' : 'https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator';
-    }
-</script>
+    <div id="log"></div>
+    <script>
+        const log = document.getElementById('log');
+        const lines = ["INIT KERNEL...", "SYNC STEAM_DB...", "MOUNT WEATHER_API...", "CALIBRATE VIBE...", "REDIRECTING..."];
+        let i = 0;
+        const interval = setInterval(() => {
+            if (i >= lines.length) {
+                window.location.href = "index.html";
+                clearInterval(interval);
+            } else {
+                log.innerHTML += `<div class="line">> ${lines[i]}</div>`;
+                i++;
+            }
+        }, 800);
+    </script>
 </body>
 </html>
