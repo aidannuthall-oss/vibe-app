@@ -5,67 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VIBE_CORE</title>
     <style>
-        body { background: #050505; color: #FFFFFF; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        #terminal { font-size: 14px; margin-bottom: 20px; }
-        .line { margin-bottom: 5px; }
-        .card { background: #1a1a1a; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-        .status-bar { background: #000; padding: 10px; border: 1px solid #333; margin-bottom: 10px; text-align: center; }
+        body { background: #050505; color: #FFFFFF; font-family: 'Courier New', monospace; margin: 0; padding: 10px; font-size: 18px; }
+        #boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; padding: 10px; z-index: 999; }
+        .log-line { margin-bottom: 4px; border-bottom: 1px solid #333; }
+        .module { margin: 10px 0; border: 1px dashed #555; padding: 5px; }
     </style>
 </head>
 <body>
 
-<div id="terminal">
-    <div id="log"></div>
+<div id="boot-screen">
+    <div id="boot-log"></div>
 </div>
 
 <div id="dashboard">
-    <div class="status-bar">
-        <div id="date-time">LOADING...</div>
-        <div id="weather-mood">ADELAIDE: -- | MOOD: --</div>
-    </div>
-    
-    <div class="card">
-        <iframe id="spotify-player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" width="100%" height="200" style="border:none;"></iframe>
-        <button onclick="cycle()" style="width:100%; padding:10px; margin-top:5px;">CYCLE PLAYLIST</button>
+    <div class="module">
+        TIME: <span id="time">--:--</span><br>
+        WEATHER: <span id="weather">--</span><br>
+        MOOD: <span id="mood">--</span><br>
+        WOTD: <span id="wotd">--</span>
     </div>
 
-    <div class="card">
-        <strong>[MOST PLAYED]</strong>
-        <div>RDR2: 160.6 hrs</div>
-        <div>Rust: 95.8 hrs</div>
-        <div>Cyberpunk 2077: 88.8 hrs</div>
-        <br>
-        <strong>[RECENTLY PLAYED]</strong>
-        <div>Mortal Kombat 1</div>
-        <div>Titanfall 2</div>
-        <div>Content Warning</div>
+    <div class="module">
+        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" width="100%" height="150" style="border:none;"></iframe>
+        <button onclick="cycle()" style="background:transparent; color:#fff; border:1px solid #fff; width:100%;">CYCLE</button>
+    </div>
+
+    <div class="module">
+        [MOST PLAYED]<br>
+        1. RDR2: 160h<br>2. Rust: 95h<br>3. CP2077: 88h<br>4. Avatar: 85h<br>5. Crimson: 63h
+    </div>
+    <div class="module">
+        [RECENT]<br>
+        MK1 | TF2 | Content Warning
     </div>
 </div>
 
 <script>
-    // 1. Visible Terminal
-    const log = document.getElementById('log');
-    const msgs = ["CORE_INIT", "SYNC_STEAM", "WEATHER_API", "READY"];
-    for(let i=0; i<10; i++) {
-        const el = document.createElement('div');
-        el.className = 'line';
-        el.innerText = `> ${msgs[i%msgs.length]} : 0x${Math.floor(Math.random()*9999)}`;
-        log.appendChild(el);
-    }
+    // Raw Boot Logic
+    const log = document.getElementById('boot-log');
+    const bootLines = ["LOAD KERNEL...", "SYNC STEAM DB...", "CHECK VIBE...", "MOUNT DRIVE...", "INIT..."];
+    let i = 0;
+    const interval = setInterval(() => {
+        if (i >= bootLines.length) {
+            document.getElementById('boot-screen').style.display = 'none';
+            clearInterval(interval);
+        } else {
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerText = "> " + bootLines[i];
+            log.appendChild(line);
+            i++;
+        }
+    }, 800);
 
-    // 2. Data
+    // Logic
     setInterval(() => {
-        document.getElementById('date-time').innerText = new Date().toLocaleString();
+        document.getElementById('time').innerText = new Date().toLocaleTimeString();
     }, 1000);
 
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(r => r.json()).then(d => {
-            document.getElementById('weather-mood').innerText = `ADELAIDE: ${d.current.temperature_2m}°C | MOOD: NEUTRAL`;
+            const t = d.current.temperature_2m;
+            document.getElementById('weather').innerText = t + "C";
+            document.getElementById('mood').innerText = (t > 20) ? "SOLAR" : "LUNAR";
         });
+    
+    document.getElementById('wotd').innerText = "LIMINAL";
 
     function cycle() {
-        const player = document.getElementById('spotify-player');
-        player.src = player.src.includes('7') ? 'https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator' : 'https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator';
+        const p = document.getElementById('player');
+        p.src = p.src.includes('7') ? 'https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator' : 'https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator';
     }
 </script>
 </body>
