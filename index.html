@@ -1,76 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIBE_CORE_MOBILE</title>
-<style>
-    :root { --bg: #050505; --text: #FFFFFF; }
-    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-    
-    /* Centered Terminal */
-    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; display: flex; flex-direction: column-reverse; overflow: hidden; justify-content: center; }
-    .line { font-size: 14px; margin-bottom: 6px; text-align: left; width: 90%; max-width: 400px; margin: 0 auto; }
-    
-    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; width: 100%; max-width: 400px; }
-    @keyframes reveal { to { opacity: 1; } }
-    
-    .card { background: #1a1a1a; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; }
-    .status-bar { background: #000; padding: 10px; border: 1px solid #333; border-radius: 8px; text-align: center; margin-bottom: 10px; }
-    
-    .list-title { font-weight: bold; margin-top: 10px; border-bottom: 1px solid #555; }
-    .list-item { padding: 4px 0; border-bottom: 1px solid #222; }
-    
-    iframe { width: 100%; border: none; border-radius: 8px; }
-    button { background: #FFFFFF; color: #000; border: none; padding: 10px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIBE_CORE</title>
+    <style>
+        body { background: #050505; color: #FFFFFF; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
+        #terminal { font-size: 14px; margin-bottom: 20px; }
+        .line { margin-bottom: 5px; }
+        .card { background: #1a1a1a; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        .status-bar { background: #000; padding: 10px; border: 1px solid #333; margin-bottom: 10px; text-align: center; }
+    </style>
 </head>
 <body>
 
-<div id="terminal"><div id="log"></div></div>
+<div id="terminal">
+    <div id="log"></div>
+</div>
 
 <div id="dashboard">
     <div class="status-bar">
-        <div id="date-time">--/--/-- --:--</div>
-        <div id="weather-mood" style="margin-top:5px;">--</div>
-        <div id="word-day" style="margin-top:5px; opacity: 0.7;">--</div>
+        <div id="date-time">LOADING...</div>
+        <div id="weather-mood">ADELAIDE: -- | MOOD: --</div>
     </div>
     
     <div class="card">
-        <iframe id="spotify-player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="200"></iframe>
-        <button onclick="cycle()">CYCLE PLAYLIST</button>
+        <iframe id="spotify-player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" width="100%" height="200" style="border:none;"></iframe>
+        <button onclick="cycle()" style="width:100%; padding:10px; margin-top:5px;">CYCLE PLAYLIST</button>
     </div>
-    
+
     <div class="card">
-        <div class="list-title">[MOST PLAYED]</div>
-        <div class="list-item">1. RDR2: 160.6 hrs</div>
-        <div class="list-item">2. Rust: 95.8 hrs</div>
-        <div class="list-item">3. Cyberpunk 2077: 88.8 hrs</div>
-        <div class="list-item">4. Avatar: Frontiers: 85.1 hrs</div>
-        <div class="list-item">5. Crimson Desert: 63.0 hrs</div>
-        
-        <div class="list-title">[RECENTLY PLAYED]</div>
-        <div class="list-item">Mortal Kombat 1 (23 May)</div>
-        <div class="list-item">Gamble w/ Friends (9 May)</div>
-        <div class="list-item">Titanfall 2 (9 May)</div>
-        <div class="list-item">Content Warning (6 May)</div>
-        <div class="list-item">Batman: Arkham (2 May)</div>
+        <strong>[MOST PLAYED]</strong>
+        <div>RDR2: 160.6 hrs</div>
+        <div>Rust: 95.8 hrs</div>
+        <div>Cyberpunk 2077: 88.8 hrs</div>
+        <br>
+        <strong>[RECENTLY PLAYED]</strong>
+        <div>Mortal Kombat 1</div>
+        <div>Titanfall 2</div>
+        <div>Content Warning</div>
     </div>
 </div>
 
 <script>
-    // 1. Terminal with Randomized System Log Messages
+    // 1. Visible Terminal
     const log = document.getElementById('log');
-    const bootSteps = ["DEBUG:INIT", "SYS:CHECK", "CPU:FREQ", "RAM:ALLOC", "NET:AUTH", "DB:SYNC", "API:LOAD", "UI:RENDER", "AUTH:TOKEN"];
-    for(let i=0; i<150; i++) {
-        setTimeout(() => {
-            if (log.children.length > 20) log.removeChild(log.firstChild);
-            const el = document.createElement('div');
-            el.className = 'line';
-            const step = bootSteps[Math.floor(Math.random()*bootSteps.length)];
-            const hex = Math.floor(Math.random()*16777215).toString(16).toUpperCase();
-            el.innerText = `[${new Date().toLocaleTimeString()}] ${step} 0x${hex} OK`;
-            log.appendChild(el);
-        }, i * 50); 
+    const msgs = ["CORE_INIT", "SYNC_STEAM", "WEATHER_API", "READY"];
+    for(let i=0; i<10; i++) {
+        const el = document.createElement('div');
+        el.className = 'line';
+        el.innerText = `> ${msgs[i%msgs.length]} : 0x${Math.floor(Math.random()*9999)}`;
+        log.appendChild(el);
     }
-    setTimeout(() => {
+
+    // 2. Data
+    setInterval(() => {
+        document.getElementById('date-time').innerText = new Date().toLocaleString();
+    }, 1000);
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
+        .then(r => r.json()).then(d => {
+            document.getElementById('weather-mood').innerText = `ADELAIDE: ${d.current.temperature_2m}°C | MOOD: NEUTRAL`;
+        });
+
+    function cycle() {
+        const player = document.getElementById('spotify-player');
+        player.src = player.src.includes('7') ? 'https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator' : 'https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator';
+    }
+</script>
+</body>
+</html>
