@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIBE_CORE_BOOT</title>
+    <title>VIBE_CORE_FINAL</title>
     <style>
-        :root { --accent: #00D4FF; } /* The Pop of Colour */
-        body { background: #050505; color: #fff; font-family: 'Courier New', monospace; padding: 10px; font-size: 16px; margin: 0; }
+        :root { --accent: #00D4FF; --bg: #050505; }
+        body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; padding: 10px; margin: 0; }
         
+        /* Boot Layers */
         #stage-1, #stage-2 { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 9999; padding: 20px; }
+        .flash { animation: flash 0.2s; }
+        @keyframes flash { 0% { background: #fff; } 100% { background: #050505; } }
+        
+        /* Polished "Bubble" aesthetic */
+        .module { background: #111; padding: 15px; margin-bottom: 12px; border-radius: 20px; border: 1px solid #222; }
         .accent { color: var(--accent); }
-        .module { border: 1px dashed var(--accent); padding: 10px; margin-bottom: 10px; }
-        iframe { width: 100%; border: none; margin-bottom: 5px; }
+        iframe { width: 100%; border: none; border-radius: 15px; }
     </style>
 </head>
 <body>
 
-<div id="stage-1">
-    <div id="log-1"></div>
-</div>
-
-<div id="stage-2" style="display:none;">
-    <div id="log-2"></div>
-</div>
+<div id="stage-1"><div id="log-1"></div></div>
+<div id="stage-2" style="display:none;"><div id="log-2"></div></div>
 
 <div id="dashboard" style="display:none;">
     <div class="module">
@@ -32,40 +32,38 @@
     </div>
 
     <div class="module">
-        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="250"></iframe>
-        <button onclick="cycle()" style="background:transparent; color:var(--accent); border:1px solid var(--accent); width:100%; padding:10px;">CYCLE</button>
+        <iframe id="player" src="https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator" height="450"></iframe>
+        <button onclick="cycle()" style="background:var(--accent); color:#000; border:none; width:100%; padding:10px; border-radius:15px; margin-top:10px; font-weight:bold;">CYCLE</button>
     </div>
 
     <div class="module">
         <strong class="accent">[MOST PLAYED]</strong><br>
         RDR2: 160.6h | Rust: 95.8h | CP2077: 88.8h
     </div>
-    
-    <div class="module">
-        <strong class="accent">[RECENT]</strong><br>
-        No Man's Sky (27 May) | MK1 (23 May) | Titanfall 2 (9 May)
-    </div>
 </div>
 
 <script>
-    // STAGE 1: Slow load (800ms per line)
-    const log1 = document.getElementById('log-1');
-    const slow = ["Initializing Hardware...", "Verifying Integrity...", "Powering Vibe Core..."];
+    // STAGE 1: 6 seconds
+    const log1 = document.getElementById('log1');
+    const slow = ["System check...", "Allocating resources...", "Loading assets...", "Vibe core stable."];
     let s = 0;
     const sInt = setInterval(() => {
         log1.innerHTML += `<div>> ${slow[s]}</div>`; s++;
         if(s >= slow.length) {
             clearInterval(sInt);
-            document.getElementById('stage-1').style.display = 'none';
-            document.getElementById('stage-2').style.display = 'block';
-            runStage2();
+            document.body.classList.add('flash');
+            setTimeout(() => {
+                document.getElementById('stage-1').style.display = 'none';
+                document.getElementById('stage-2').style.display = 'block';
+                runStage2();
+            }, 200);
         }
-    }, 800);
+    }, 1400); // 6s total
 
-    // STAGE 2: Rapid Jumble (50ms per line)
+    // STAGE 2: 4 seconds
     function runStage2() {
-        const log2 = document.getElementById('log-2');
-        const rapid = ["KERN_A", "SYNC_B", "NET_C", "RAM_D", "IO_E", "VIBE_F", "READY"];
+        const log2 = document.getElementById('log2');
+        const rapid = ["NET_01", "KERN_02", "DASH_03", "SYNC_04", "UI_05", "READY"];
         let r = 0;
         const rInt = setInterval(() => {
             log2.innerHTML += `<div>> <span class="accent">${rapid[r]}</span>_0x${Math.floor(Math.random()*999)}</div>`; r++;
@@ -74,10 +72,10 @@
                 document.getElementById('stage-2').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
             }
-        }, 50);
+        }, 650); // 4s total
     }
 
-    // Logic
+    // Dashboard Logic
     setInterval(() => document.getElementById('time').innerText = new Date().toLocaleTimeString(), 1000);
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
         .then(r => r.json()).then(d => {
