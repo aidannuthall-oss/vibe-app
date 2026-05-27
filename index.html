@@ -2,22 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>VIBE_CORE_FINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIBE_CORE_MOBILE</title>
 <style>
     :root { --bg: #050505; --text: #00FF41; }
-    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; margin: 0; padding: 10px; overflow-x: hidden; }
     
-    /* Auto-scrolling, self-cleaning terminal */
-    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; overflow: hidden; }
-    .line { font-size: 20px; margin-bottom: 8px; border-left: 4px solid #00FF41; padding-left: 15px; }
+    /* Self-cleaning Terminal */
+    #terminal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; padding: 20px; background: #050505; z-index: 9999; display: flex; flex-direction: column-reverse; overflow: hidden; }
+    .line { font-size: 16px; margin-bottom: 8px; white-space: nowrap; }
     
-    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; height: 100vh; overflow-y: auto; padding-bottom: 50px; }
+    /* Dashboard Layout: Optimized for phone (vertical stacking) */
+    #dashboard { opacity: 0; animation: reveal 1s ease 10s forwards; display: flex; flex-direction: column; gap: 15px; }
     @keyframes reveal { to { opacity: 1; } }
     
-    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-    .status-bar { font-size: 16px; font-weight: bold; background: #111; padding: 15px; border-radius: 4px; display: flex; justify-content: space-between; }
+    .card { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 8px; }
+    .status-bar { font-size: 14px; font-weight: bold; background: #111; padding: 10px; border-radius: 4px; display: flex; flex-direction: column; gap: 4px; text-align: center; }
     iframe { width: 100%; border: none; border-radius: 4px; }
-    button { background: #00FF41; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; }
+    button { background: #00FF41; color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; font-size: 14px; cursor: pointer; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -25,9 +27,9 @@
 <div id="terminal"><div id="log"></div></div>
 
 <div id="dashboard">
-    <div id="status-bar" class="status-bar">
+    <div id="status-bar" class="status-bar card">
         <span id="time">TIME: --:--</span>
-        <span>MOOD: FOCUSED</span>
+        <span id="vibe-mode">VIBE: ...</span>
         <span id="weather">WEATHER: LOADING...</span>
     </div>
     
@@ -36,42 +38,56 @@
         <button onclick="cycle()">CYCLE_PLAYLIST</button>
     </div>
     
-    <div class="card" style="display:flex; gap: 20px;">
-        <div id="top-games" style="flex:1;"><strong>MOST PLAYED:</strong></div>
-        <div id="recent-games" style="flex:1;"><strong>LAST 5 PLAYED:</strong></div>
+    <div class="card">
+        <div id="steam-data">
+            <div><strong>[MOST_PLAYED]</strong></div>
+            <div>> Red Dead Redemption 2 (160h)</div>
+            <div>> Rust (95h)</div>
+            <div>> Cyberpunk 2077 (88h)</div>
+            <div>> Avatar: Frontiers (85h)</div>
+            <div>> Crimson Desert (63h)</div>
+            <br>
+            <div><strong>[LAST_PLAYED]</strong></div>
+            <div>> Sifu (Dec 2025)</div>
+            <div>> Detroit: Become Human (Jan)</div>
+            <div>> Among Us (Jan)</div>
+            <div>> Mage Arena (Jan)</div>
+            <div>> Peek (Jan)</div>
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. High Speed Auto-Scrolling Terminal
+    // 1. Rebuilt Auto-Scrolling, Self-Cleaning Terminal
     const log = document.getElementById('log');
-    function addLine(text) {
-        const el = document.createElement('div');
-        el.className = 'line';
-        el.innerText = `[${new Date().toLocaleTimeString()}] > ${text}`;
-        log.appendChild(el);
-        if (log.children.length > 15) log.removeChild(log.firstChild); // Delete old lines
+    const queue = [];
+    const commands = ["VIBE_CORE_BOOT", "KERNEL_LOAD_OK", "MEM_CHK: 8GB", "INIT_WEATHER_ENGINE", "SYNC_STEAM_LIBRARY_LOCAL", "TCP_HANDSHAKE: 192.168.1.10", "DASHBOARD_RENDER_START", "AUTH_TOKEN_GEN"];
+    
+    for(let i=0; i<150; i++) {
+        setTimeout(() => {
+            if (log.children.length > 20) log.removeChild(log.firstChild); // Keep memory clean
+            const el = document.createElement('div');
+            el.className = 'line';
+            el.innerText = `[${new Date().toLocaleTimeString()}] > ${commands[Math.floor(Math.random()*commands.length)]}`;
+            log.appendChild(el);
+            // This forces the "scroll-down" behavior on each add
+            document.getElementById('terminal').scrollTop = document.getElementById('terminal').scrollHeight;
+        }, i * 50); 
     }
-    const msgs = ["INITIALIZING_CORE", "SYNCING_STEAM_DATA", "WEATHER_CALIBRATION", "MEMORY_FLUSH_COMPLETE"];
-    for(let i=0; i<100; i++) {
-        setTimeout(() => addLine(msgs[i % msgs.length]), i * 100);
-    }
-    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 10000);
+    setTimeout(() => { document.getElementById('terminal').style.display = 'none'; }, 9500);
 
-    // 2. Steam Data (Manually set for accuracy)
-    const topGames = ["CS2 (500h)", "BG3 (200h)", "Cyberpunk (120h)", "Elden Ring (85h)", "Stardew (40h)"];
-    const lastPlayed = ["Elden Ring", "CS2", "Cyberpunk", "Hollow Knight", "Terraria"];
-    document.getElementById('top-games').innerHTML += "<br>" + topGames.join("<br>");
-    document.getElementById('recent-games').innerHTML += "<br>" + lastPlayed.join("<br>");
-
-    // 3. Status Bar
+    // 2. Mobile Status Bar
     setInterval(() => {
         document.getElementById('time').innerText = `TIME: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     }, 1000);
     fetch('https://api.open-meteo.com/v1/forecast?latitude=-34.9285&longitude=138.6007&current=temperature_2m')
-        .then(r => r.json()).then(d => document.getElementById('weather').innerText = `WEATHER: ${d.current.temperature_2m}°C`);
+        .then(r => r.json()).then(d => {
+            const temp = d.current.temperature_2m;
+            document.getElementById('weather').innerText = `WEATHER: ${temp}°C`;
+            document.getElementById('vibe-mode').innerText = `VIBE: ${temp > 22 ? 'DAY_ACTIVE' : 'DAY_CHILL'}`;
+        });
 
-    // 4. Playlist
+    // 3. Playlist
     const links = ["https://open.spotify.com/embed/playlist/2GbIR2TAstFY3cg003yFgT?utm_source=generator", "https://open.spotify.com/embed/playlist/2CYaNy5UXj7YEC1ObftXgG?utm_source=generator", "https://open.spotify.com/embed/playlist/7jSnO8TrhskDCXGso3ssn2?utm_source=generator", "https://open.spotify.com/embed/playlist/0rzaHRMSw8JxmH8ALW9489?utm_source=generator"];
     let idx = 0;
     function cycle() { idx = (idx + 1) % links.length; document.getElementById('spotify-player').src = links[idx]; }
